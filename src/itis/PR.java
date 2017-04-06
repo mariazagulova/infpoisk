@@ -10,20 +10,25 @@ public class PR {
 
 	HashMap<String, Integer> dictionary = new HashMap<String, Integer>();
 	
+	public synchronized HashMap<String,Double> iterationThreaded(HashMap<String, ListOfProbabilities> matrix, HashMap<String,Double> vector, String[] order) {
+		//МЕТОД С МНОГОПОТОЧНОСТЬЮ
+			int number = 25;
+			HashMap<String,Double> originvector = vector;
+			for (int i=0; i<order.length; i = i+number) {
+				int end = i+number-1;
+				if (end >= order.length) end = order.length-1;
+				Thread worker = new SmartThread(originvector,vector,matrix,i,end,order);
+				worker.start();
+			}
+			
+			return vector;
+	}
+	
 	public HashMap<String,Double> iteration(HashMap<String, ListOfProbabilities> matrix, HashMap<String,Double> vector, String[] order) {
 	
-		//МЕТОД С МНОГОПОТОЧНОСТЬЮ
-		int number = 10;
-		for (int i=0; i<order.length; i = i+number) {
-			int end = i+number-1;
-			if (end >= order.length) end = order.length-1;
-			Thread worker = new SmartThread(vector,matrix,i,end,order);
-			worker.start();
-		}
-		
 		
 		///////////////МЕТОД БЕЗ МНОГОПОТОЧНОСТИ
-		/*for (String vectorkey: vector.keySet()) {
+		for (String vectorkey: vector.keySet()) {
 			//ищем все встречающиеся упоминания, умножаем на соотв.куски вектора и складываем всё
 			double old = vector.get(vectorkey);
 			double sum = 0.15;
@@ -35,7 +40,7 @@ public class PR {
 			}
 			//if (sum > old) sum = sum - old;
 			vector.put(vectorkey, sum);
-		}*/
+		}
 		
 		
 		return vector;
@@ -64,7 +69,7 @@ public class PR {
 	}
 			
 	
-	public HashMap<String,Double> PageRank(HashMap<String,ListOfDestinations> matrix) throws IOException {
+	public HashMap<String,Double> PageRank(HashMap<String,ListOfDestinations> matrix, Boolean multithread) throws IOException {
 		HashMap<String, ListOfProbabilities> probMatrix = formProbabilityMatrix(matrix);
 		HashMap<String,Double> vector = new HashMap<String,Double>();
 		
@@ -100,7 +105,11 @@ public class PR {
 			double sum2 = 0;
 			String[] order = fillOrder();
 			
-			vector = iteration(probMatrix, vector, order);
+			if (multithread) {
+				vector = iterationThreaded(probMatrix, vector, order);
+			} else {
+				vector = iteration(probMatrix, vector, order);
+			}
 			
 			Double[] vec = new Double[vector.keySet().size()];
 			for (String s: vector.keySet()) {
