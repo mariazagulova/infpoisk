@@ -11,13 +11,14 @@ public class Main {
 		// TODO Auto-generated method stub
 
 		Matrix m = new Matrix();
-		//m.fillMatrix("vashdom.ru",200);
+		m.fillMatrix("vashdom.ru",200);
 		//m.makeArray();
-		m.matrixFromFile(new File("/home/mariya/workspace/PageRank/разреженная.csv"));
+		//m.matrixFromFile(new File("/home/mariya/workspace/PageRank/разреженная.csv"));
 		
 		PR pagerank = new PR();
 		pagerank.fillDict(m.getMatrix());
-		pagerank.PageRank(m.getMatrix());
+		//считать pagerank со значением multithread = true
+		pagerank.PageRank(m.getMatrix(), true);
 	}
 
 }
